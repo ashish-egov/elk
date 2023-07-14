@@ -283,3 +283,117 @@ curl -H "Content-Type: application/x-ndjson" -XPOST "localhost:9200/my_index/_bu
 ```
 
 In this example, cURL sends a bulk request to Elasticsearch to index all the documents in the "my_data.json" file. The file should contain one JSON object per line, as required by the  bulk API.
+
+
+
+### Introduction to Analysis
+
+-   Analysis is the process of converting text into terms that can be searched efficiently.
+-   It involves tokenization, stemming, stopword removal, and other techniques that help to normalize the text.
+-   Elasticsearch provides a powerful analysis engine that can be customized to meet the needs of different use cases.
+
+### Using the Analyze API
+
+-   The  Analyze API  allows you to test the analysis process for a specific text string.
+-   You can use it to see how Elasticsearch will tokenize and normalize a piece of text, and to debug any issues with your  analysis configuration.
+-   The syntax for the Analyze API is as follows:
+
+```
+GET /_analyze
+{
+  "analyzer": "standard",
+  "text": "This is a sample text"
+}
+
+```
+
+-   This will return the tokens produced by the standard analyzer for the given text:
+
+```
+{
+  "tokens": [
+    {
+      "token": "this",
+      "start_offset": 0,
+      "end_offset": 4,
+      "type": "<ALPHANUM>",
+      "position": 0
+    },
+    {
+      "token": "is",
+      "start_offset": 5,
+      "end_offset": 7,
+      "type": "<ALPHANUM>",
+      "position": 1
+    },
+    {
+      "token": "a",
+      "start_offset": 8,
+      "end_offset": 9,
+      "type": "<ALPHANUM>",
+      "position": 2
+    },
+    {
+      "token": "sample",
+      "start_offset": 10,
+      "end_offset": 16,
+      "type": "<ALPHANUM>",
+      "position": 3
+    },
+    {
+      "token": "text",
+      "start_offset": 17,
+      "end_offset": 21,
+      "type": "<ALPHANUM>",
+      "position": 4
+    }
+  ]
+}
+
+```
+
+### Understanding Inverted Indices
+
+-   An  inverted index  is a  data structure  that allows for quick full-text searches.
+-   It is used by Elasticsearch to store the terms in a document and the documents that contain each term.
+-   Elasticsearch uses a  reverse index  to optimize search speed by storing the terms and their corresponding documents in memory.
+
+### Introduction to Mapping
+
+-   A mapping defines how documents and their fields are indexed and stored in Elasticsearch.
+-   It specifies the data type of each field, how it should be analyzed, and other configuration options.
+-   Elasticsearch automatically creates a mapping for each index based on the first document that is indexed.
+
+### Overview of Data Types
+
+-   Elasticsearch supports a variety of data types, including:
+    
+    -   Text: Used for full-text search and analysis.
+    -   Keyword: Used for  exact matches  and aggregations.
+    -   Long, Integer, Short, Byte, Double, Float, Half Float, Scaled Float: Used for numeric values.
+    -   Date: Used for date and time values.
+    -   Boolean: Used for true/false values.
+    -   Binary: Used for storing binary data.
+    -   Range: Used for ranges of numeric or date values.
+    -   Object: Used for  nested objects.
+    -   Nested: Used for arrays of objects.
+    -   Geo-point: Used for latitude/longitude coordinates.
+-   When defining a mapping, you must specify the data type for each field. For example:
+    
+
+```
+PUT /my_index
+{
+  "mappings": {
+    "properties": {
+      "name": { "type": "text" },
+      "price": { "type": "float" },
+      "color": { "type": "keyword" },
+      "created_at": { "type": "date" }
+    }
+  }
+}
+
+```
+
+This creates an index called  `my_index`  with a mapping that defines four fields:  `name`,  `price`,  `color`, and  `created_at`. The  `type`  parameter specifies the data type for each field.
