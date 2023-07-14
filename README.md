@@ -205,23 +205,6 @@ PUT /my_index/_doc/1
 
 In this example, Elasticsearch will assign the document version number "1" to the newly  indexed document.
 
-## 30. Optimistic concurrency control
-
--   Optimistic concurrency control is a technique for handling concurrent updates to a document.
--   Elasticsearch provides a version parameter that can be used to implement optimistic concurrency control.
--   When updating a document, you can specify the current version number, and Elasticsearch will only update the document if the  current version number  matches the one in the index.
-
-Example:
-
-
-```
-PUT /my_index/_doc/1?version=1
-{
-  "title": "Updated Elasticsearch Course",
-  "description": "Learn how to use Elasticsearch and Kibana for search and analytics"
-}
-
-
 ## 31. Update by query
 
 -   Update by query is a way to update multiple documents that match a query.
@@ -305,7 +288,3 @@ curl -H "Content-Type: application/x-ndjson" -XPOST "localhost:9200/my_index/_bu
 ```
 
 In this example, cURL sends a bulk request to Elasticsearch to index all the documents in the "my_data.json" file. The file should contain one JSON object per line, as required by the  bulk API.
-
-```
-
-In this example, Elasticsearch will only update the document if the  current version  number is "1". If the version number has been incremented by another update operation, Elasticsearch will return a  version conflict error.
