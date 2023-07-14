@@ -449,3 +449,174 @@ PUT /my_index/_mapping
 ```
 
 This adds an explicit mapping for the  `my_index`  index, which defines three fields:  `name`,  `tags`, and  `created_at`. The  `type`  parameter specifies the data type for each field, and additional parameters can be used to specify  analysis settings,  date formats, and other configuration options.
+
+
+## 46. Retrieving mappings
+
+Mapping in Elasticsearch is the process of defining the schema or structure of your data. The mapping describes the fields in your documents, their data types, and how they should be indexed and stored. You can retrieve the mapping for an index using the  `_mapping`  API.
+
+Here is an example of how to retrieve the mapping for an index named  `my_index`  using the  Elasticsearch Java API:
+
+```
+GetMappingsRequest request = new GetMappingsRequest();
+request.indices("my_index");
+
+GetMappingsResponse response = client.indices().getMapping(request, RequestOptions.DEFAULT);
+Map<String, MappingMetaData> mappings = response.mappings();
+
+```
+
+This code sends a  `GET`  request to the  `_mapping`  API with the name of the index. The response contains a map of index names to their corresponding mappings.
+
+## 47. Using dot notation in  field names
+
+In Elasticsearch, you can use  dot notation  in field names to define nested fields. For example, if you have a document with a nested field called  `address`  with sub-fields  `street`,  `city`, and  `state`, you can define the field as  `address.street`,  `address.city`, and  `address.state`.
+
+Here is an example of how to define  nested fields  using dot notation in a mapping:
+
+```
+{
+  "mappings": {
+    "properties": {
+      "address": {
+        "properties": {
+          "street": { "type": "text" },
+          "city": { "type": "text" },
+          "state": { "type": "text" }
+        }
+      }
+    }
+  }
+}
+
+```
+
+This mapping defines a  nested field  called  `address`  with sub-fields  `street`,  `city`, and  `state`.
+
+## 48. Adding mappings to existing indices
+
+You can add mappings to an existing index using the  `_mapping`  API. If the index already contains data, you will need to reindex the data to apply the new mappings.
+
+Here is an example of how to add mappings to an existing index named  `my_index`  using the Elasticsearch Java API:
+
+```
+PutMappingRequest request = new PutMappingRequest("my_index");
+request.source("{\"properties\":{\"new_field\":{\"type\":\"text\"}}}", XContentType.JSON);
+
+AcknowledgedResponse response = client.indices().putMapping(request, RequestOptions.DEFAULT);
+
+```
+
+This code sends a  `PUT`  request to the  `_mapping`  API with the name of the index and the new mapping definition. The response indicates whether the operation was successful.
+
+## 49. How dates work in Elasticsearch
+
+In Elasticsearch, dates are stored as a timestamp in milliseconds since the Unix epoch. You can use the  `date`  data type to define  date fields  in your mapping.
+
+Here is an example of how to define a  date field  in a mapping:
+
+```
+{
+  "mappings": {
+    "properties": {
+      "timestamp": { "type": "date" }
+    }
+  }
+}
+
+```
+
+This mapping defines a field called  `timestamp`  with a  `date`  data type.
+
+## 50. How  missing fields  are handled
+
+When querying Elasticsearch, you may encounter fields that are missing from some documents. Elasticsearch provides several options for how to handle these missing fields, including throwing an exception, returning a null value, or returning a default value.
+
+Here is an example of how to handle missing fields in a query:
+
+```
+{
+  "query": {
+    "match": {
+      "missing_field": {
+        "query": "default_value",
+        "default_operator": "OR"
+      }
+    }
+  }
+}
+
+```
+
+This query searches for documents that contain the  `missing_field`  with a default value of  `default_value`  if the field is missing. The  `default_operator`  parameter specifies how to combine the  default value  with other query terms.
+
+## 51. Overview of  mapping parameters
+
+Elasticsearch provides several mapping parameters that allow you to customize the behavior of your fields, including their data type, indexing options, and storage options. Some common mapping parameters include  `type`,  `index`,  `store`,  `analyzer`, and  `fields`.
+
+Here is an example of how to use mapping parameters to define a field:
+
+
+```
+{
+  "mappings": {
+    "properties": {
+      "my_field": {
+        "type": "text",
+        "index": true,
+        "store": false,
+        "analyzer": "standard",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+This mapping defines a field called  `my_field`  with a  `text`  data type,  `standard`  analyzer, and a sub-field called`keyword`  with a  `keyword`  data type and a maximum length of 256 characters.
+
+## 52. Updating existing mappings
+
+You can update an existing mapping in Elasticsearch by sending a  `PUT`  request to the  `_mapping`  API with the new mapping definition. However, some changes to the mapping may require reindexing of the data to take effect.
+
+Here is an example of how to update an existing mapping for a field called  `my_field`  to change its data type from  `text`  to  `keyword`:
+
+```
+{
+  "properties": {
+    "my_field": {
+      "type": "keyword"
+    }
+  }
+}
+
+```
+
+This mapping updates the  `my_field`  field to use a  `keyword`  data type instead of  `text`.
+
+## 53. Reindexing documents with the Reindex API
+
+The  Reindex API  in Elasticsearch allows you to copy documents from one index to another, or to modify documents during the copying process. This can be useful when you need to change the mapping or  data structure  of an index.
+
+Here is an example of how to use the Reindex API to reindex documents from an index called  `old_index`  to a new index called  `new_index`:
+
+```
+POST _reindex
+{
+  "source": {
+    "index": "old_index"
+  },
+  "dest": {
+    "index": "new_index"
+  }
+}
+
+```
+
+This request copies all the documents from the  `old_index`  to the  `new_index`. You can also use the Reindex API to modify documents during the copying process by specifying a  `script`  parameter or a  `query`  parameter to filter the documents to be copied.
