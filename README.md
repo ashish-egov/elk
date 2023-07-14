@@ -82,11 +82,6 @@ POST /my_index/_update/1
   }
 }
 
- 
-  "title": "Updated Elasticsearch Course",
-  "description": "Learn how to use Elasticsearch and Kibana for search and analytics"
-}
-
 ```
 
 In this example, Elasticsearch will only update the document if the  current version  number is "1". If the version number has been incremented by another update operation, Elasticsearch will return a  version conflict error.
