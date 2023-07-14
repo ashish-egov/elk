@@ -82,6 +82,18 @@ POST /my_index/_update/1
   }
 }
 
+ 
+  "title": "Updated Elasticsearch Course",
+  "description": "Learn how to use Elasticsearch and Kibana for search and analytics"
+}
+
+```
+
+In this example, Elasticsearch will only update the document if the  current version  number is "1". If the version number has been incremented by another update operation, Elasticsearch will return a  version conflict error.
+
+
+The response will contain information about the update operation, including the document ID and index name. The script updates the "description" field with the new value provided in the "params" section.
+
 # Elastic Search  and Kibana Course Notes
 
 ## 23. Upserts
@@ -212,7 +224,3 @@ PUT /my_index/_doc/1?version=1
 ```
 
 In this example, Elasticsearch will only update the document if the  current version  number is "1". If the version number has been incremented by another update operation, Elasticsearch will return a  version conflict error.
-
-```
-
-The response will contain information about the update operation, including the document ID and index name. The script updates the "description" field with the new value provided in the "params" section.
