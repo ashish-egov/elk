@@ -221,6 +221,91 @@ PUT /my_index/_doc/1?version=1
   "description": "Learn how to use Elasticsearch and Kibana for search and analytics"
 }
 
+
+## 31. Update by query
+
+-   Update by query is a way to update multiple documents that match a query.
+-   To perform an update by query, use the update_by_query API.
+
+Example:
+
+
+```
+POST /my_index/_update_by_query
+{
+  "script": {
+    "source": "ctx._source.title = params.new_title",
+    "params": {
+      "new_title": "Updated Elasticsearch Course"
+    }
+  },
+  "query": {
+    "match": {
+      "description": "Elasticsearch"
+    }
+  }
+}
+
+```
+
+In this example,  Elasticsearch  will update the "title" field of all documents that contain the word "Elasticsearch" in the "description" field.
+
+## 32. Delete by query
+
+-   Delete by query is a way to delete multiple documents that match a query.
+-   To perform a delete by query, use the delete_by_query  API.
+
+Example:
+
+
+```
+POST /my_index/_delete_by_query
+{
+  "query": {
+    "match": {
+      "description": "Elasticsearch"
+    }
+  }
+}
+
+```
+
+In this example, Elasticsearch will delete all documents that contain the word "Elasticsearch" in the "description" field.
+
+## 33. Batch processing
+
+-   Batch processing  is a way to perform  multiple indexing, update, or delete operations in a single request.
+-   Batch processing can improve  indexing performance  by reducing network overhead.
+-   To perform batch processing, use the bulk API.
+
+Example:
+
+
+```
+POST /my_index/_bulk
+{ "index": { "_id": "1" } }
+{ "title": "Elasticsearch Course", "description": "Learn how to use Elasticsearch and Kibana" }
+{ "delete": { "_id": "2" } }
+
+```
+
+In this example, Elasticsearch will perform three operations in a single request: index a document with ID "1", delete the document with ID "2", and index a new document with an automatically generated ID.
+
+## 34. Importing data with cURL
+
+-   cURL is a command-line tool for transferring data using various protocols, including HTTP.
+-   You can use cURL to import data into Elasticsearch from a file.
+-   The  data file  should contain one  JSON object  per line.
+
+Example:
+
+```
+curl -H "Content-Type: application/x-ndjson" -XPOST "localhost:9200/my_index/_bulk" --data-binary "@my_data.json"
+
+```
+
+In this example, cURL sends a bulk request to Elasticsearch to index all the documents in the "my_data.json" file. The file should contain one JSON object per line, as required by the  bulk API.
+
 ```
 
 In this example, Elasticsearch will only update the document if the  current version  number is "1". If the version number has been incremented by another update operation, Elasticsearch will return a  version conflict error.
