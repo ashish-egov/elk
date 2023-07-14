@@ -397,3 +397,55 @@ PUT /my_index
 ```
 
 This creates an index called  `my_index`  with a mapping that defines four fields:  `name`,  `price`,  `color`, and  `created_at`. The  `type`  parameter specifies the data type for each field.
+
+### How the "Keyword" Data Type Works
+
+-   The  `keyword`  data type is used for fields that contain exact values.
+-   By default, Elasticsearch treats text fields as full-text fields, which means they are analyzed and broken down into individual terms for searching.
+-   In contrast,  `keyword`  fields are not analyzed and store the exact value of the field.
+-   This makes them ideal for fields that are used for filtering, sorting, and aggregations.
+
+### Understanding Type Coercion
+
+-   Elasticsearch tries to convert values of one data type to another data type, based on the context in which they are used.
+-   This is known as  type coercion.
+-   For example, if you try to index a string value in a  numeric field, Elasticsearch will try to convert the string to a number before indexing it.
+-   Type coercion can sometimes lead to unexpected results, so it's important to be aware of how it works.
+
+### Understanding Arrays
+
+-   Elasticsearch supports arrays, which allow you to store multiple values in a single field.
+-   Arrays can be used for fields that have multiple values, such as tags, categories, or authors.
+-   When querying an  array field, Elasticsearch returns any documents that contain at least one matching value in the array.
+-   You can also use aggregations to group and analyze the values in an array.
+
+### Adding Explicit Mappings
+
+-   Elasticsearch automatically creates a mapping for each index based on the first document that is indexed.
+-   However, it's often useful to define an  explicit mapping  that specifies the data type and analysis settings for each field.
+-   You can define an explicit mapping when creating an index, or you can update the mapping for an existing index.
+-   Explicit mappings are useful for ensuring  consistent data types  across documents, optimizing  search performance, and preventing unexpected type coercion.
+
+Here's an example of how to add an explicit mapping to an index:
+
+```
+PUT /my_index/_mapping
+{
+  "properties": {
+    "name": {
+      "type": "text",
+      "analyzer": "english"
+    },
+    "tags": {
+      "type": "keyword"
+    },
+    "created_at": {
+      "type": "date",
+      "format": "yyyy-MM-dd HH:mm:ss"
+    }
+  }
+}
+
+```
+
+This adds an explicit mapping for the  `my_index`  index, which defines three fields:  `name`,  `tags`, and  `created_at`. The  `type`  parameter specifies the data type for each field, and additional parameters can be used to specify  analysis settings,  date formats, and other configuration options.
