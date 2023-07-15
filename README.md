@@ -1102,3 +1102,163 @@ PUT my-index/_mapping
 ```
 
 This updates the  `title`  field to use the  `new_analyzer`  analyzer. After updating the mapping, the documents in the index will need to be re-indexed to apply the new analyzer.
+
+
+## 70. Introduction to Searching
+
+Searching in  Elasticsearch  is done using queries, which can be run against one or more indices to retrieve matching documents. Queries can be simple or complex, and can use a variety of  search parameters  to find the desired results.
+
+Here's an example of a simple  search query  that retrieves all documents in an index:
+
+
+```
+GET my-index/_search
+
+```
+
+## 71. Introduction to Term Level Queries
+
+Term level queries are used to match  exact terms  or phrases in a field. These queries are useful when searching for specific keywords or phrases, and can be combined with other search parameters to refine the results.
+
+Here are some of the most commonly used term level queries in Elasticsearch:
+
+-   `term`: Matches exact terms in a field.
+-   `terms`: Matches multiple exact terms in a field.
+-   `match`: Matches terms in a field using a specific analyzer.
+-   `match_phrase`: Matches exact phrases in a field.
+
+Here's an example of a  `term`  query that retrieves documents where the  `category`  field contains the term "electronics":
+
+json
+
+Copy
+
+```
+GET my-index/_search
+{
+  "query": {
+    "term": {
+      "category": "electronics"
+    }
+  }
+}
+
+```
+
+## 72. Searching for Terms
+
+Searching for terms in Elasticsearch can be done using term level queries or full-text queries. Term level queries are used to match exact terms in a field, while full-text queries are used to match terms based on analysis.
+
+Here's an example of a full-text search query that retrieves documents where the  `title`  field contains the term "running shoes":
+
+```
+GET my-index/_search
+{
+  "query": {
+    "match": {
+      "title": "running shoes"
+    }
+  }
+}
+
+```
+
+This query uses the  `match`  query to search the  `title`  field using the  default analyzer.
+
+## 73. Retrieving Documents by IDs
+
+Retrieving documents by their IDs in Elasticsearch is a fast and efficient way to retrieve specific documents. This can be done using the  `get`  API, which retrieves a document by its ID from a specific index.
+
+Here's an example of how to retrieve a document by its ID:
+
+```
+GET my-index/_doc/1234
+
+```
+
+This retrieves the document with the ID  `1234`  from the index  `my-index`.
+
+## 74. Range Searches
+
+Range searches in Elasticsearch are used to retrieve documents where a field falls within a specified range. This can be useful for filtering documents based on numeric or date fields.
+
+Here's an example of a range search query that retrieves documents where the  `price`  field is between 50 and 100:
+
+```
+GET my-index/_search
+{
+  "query": {
+    "range": {
+      "price": {
+        "gte": 50,
+        "lte": 100
+      }
+    }
+  }
+}
+
+```
+
+This query uses the  `range`  query to search the  `price`  field for values greater than or equal to 50 and less than or equal to 100.
+
+## 75. Prefixes, Wildcards & Regular Expressions
+
+Prefixes, wildcards, and regular expressions can be used in Elasticsearch to search for terms that match a specific pattern.
+
+-   Prefixes:  Match terms  that begin with a specific prefix.
+-   Wildcards: Match terms that contain a specific pattern of characters.
+-   Regular expressions: Match terms based on a specific pattern of characters using  regular expressions.
+
+Here's an example of a  wildcard search query  that retrieves documents where the  `title`  field contains the term "runners":
+
+```
+GET my-index/_search
+{
+  "query": {
+    "wildcard": {
+      "title": "*runners*"
+    }
+  }
+}
+
+```
+
+This query uses the  `wildcard`  query to search the  `title`  field for terms that contain the string "runners".
+
+## 76. Querying by Field Existence
+
+Querying by  field existence  in Elasticsearch can be done using the  `exists`  query, which retrieves documents where a specific field exists or does not exist.
+
+Here's an example of an  exists query  that retrieves documents where the  `description`  field exists:
+
+```
+GET my-index/_search
+{
+  "query": {
+    "exists": {
+      "field": "description"
+    }
+  }
+}
+
+```
+
+This query uses the  `exists`  query to search for documents where the  `description`  field exists. To retrieve documents where the field does not exist, you can use the  `must_not`  parameter:
+
+```
+GET my-index/_search
+{
+  "query": {
+    "bool": {
+      "must_not": {
+        "exists": {
+          "field": "description"
+        }
+      }
+    }
+  }
+}
+
+```
+
+This query uses a  `bool`  query to negate the  `exists`  query and retrieve documents where the  `description`  field does not exist.
