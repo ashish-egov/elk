@@ -620,3 +620,263 @@ POST _reindex
 ```
 
 This request copies all the documents from the  `old_index`  to the  `new_index`. You can also use the Reindex API to modify documents during the copying process by specifying a  `script`  parameter or a  `query`  parameter to filter the documents to be copied.
+## 54. Defining Field Aliases
+
+-   Field aliases  allow us to define multiple names for the same field in an index.
+-   Aliases can be used to make it easier to search for data in a specific field or to apply different settings to the same field.
+-   To define a  field alias, we can use the  `aliases`  parameter when creating or updating an index mapping.
+-   Here is an example of how to define a field alias:
+
+```
+PUT my_index
+{
+  "mappings": {
+    "properties": {
+      "message": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "search": {
+            "type": "text",
+            "analyzer": "english"
+          }
+        }
+      },
+      "msg": {
+        "type": "alias",
+        "path": "message"
+      }
+    }
+  }
+}
+
+```
+
+-   In this example, we define an alias  `msg`  for the field  `message`.
+-   We specify the alias using a new field with a type of  `alias`  and a  `path`  parameter that specifies the field to alias.
+
+## 55. Multi-Field Mappings
+
+-   Multi-field mappings allow us to index the same field in different ways for different purposes.
+-   For example, we might want to index a field as both a  `text`  field for full-text search and as a  `keyword`  field for aggregations.
+-   To define a multi-field mapping, we can use the  `fields`  parameter when creating or updating an index mapping.
+-   Here is an example of how to define a multi-field mapping:
+
+```
+PUT my_index
+{
+  "mappings": {
+    "properties": {
+      "message": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "search": {
+            "type": "text",
+            "analyzer": "english"
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+-   In this example, we define a  `text`  field  `message`  and two sub-fields:  `message.keyword`  and  `message.search`.
+-   The  `message.keyword`  field is a  `keyword`  field that can be used for aggregations and exact matches.
+-   The  `message.search`  field is also a  `text`  field, but it uses a different analyzer to support full-text search.
+
+## 56. Index Templates
+
+-   Index templates  allow us to define mappings and settings that will be applied automatically to new indices created that match a certain pattern.
+-   For example, we might want to define a template that applies to all indices whose names start with  `logstash-`.
+-   To define an  index template, we can use the  `PUT _template/template_name`  API.
+-   Here is an example of how to define an index template:
+
+```
+PUT _template/my_template
+{
+  "index_patterns": ["logstash-*"],
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "properties": {
+      "message": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+```
+
+-   In this example, we define an index template  `my_template`  that applies to all indices whose names start with  `logstash-`.
+-   The template sets the number of shards to 1 and defines a mapping for the  `message`  field.
+
+## 57. Introduction to the  Elastic Common Schema  (ECS)
+
+-   The Elastic Common Schema (ECS) is a specification that defines a common set of fields for logging and metrics data.
+-   The goal of ECS is to make it easier to search and analyze data from different sources by providing a common vocabulary.
+-   ECS defines a set of fields for common data types like IP addresses,  URLs, and user agents, as well as fields for metadata like timestamps and  log levels.
+-   Here is an example of how to use ECS in an index mapping:
+
+```
+PUT my_index
+{
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "event": {
+        "properties": {
+          "category": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
+      },
+      "source": {
+        "properties": {
+          "ip": {
+            "type": "ip"
+          },
+          "port": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+-   In this example, we define an  index mapping  that uses  ECS fields  for the  `@timestamp`,  `event`, and  `source`  fields.
+-   The  `event`  field has sub-fields for  `category`  and  `type`, while the  `source`  field has sub-fields for  `ip`  and  `port`.
+-   By using ECS fields, we can ensure that our data is consistent and easier to search and analyze.
+
+## 58. Introduction to  Dynamic Mapping
+
+-   Dynamic mapping is a feature of  Elasticsearch  that automatically detects and maps new fields as they are indexed.
+-   This allows us to index data without defining a mapping beforehand, which can be useful when dealing with unstructured or  changing data.
+-   When Elasticsearch encounters a new field, it uses heuristics to determine the data type and other properties of the field.
+-   Here is an example of how dynamic mapping works:
+
+```
+PUT my_index/_doc/1
+{
+  "message": "hello world",
+  "count": 1,
+  "tags": ["red", "green", "blue"]
+}
+
+```
+
+-   In this example, we index a document with three fields:  `message`,  `count`, and  `tags`.
+-   Since we did not define a mapping beforehand, Elasticsearch will create one automatically based on the data it sees.
+-   In this case, Elasticsearch will map  `message`  as a  `text`  field,  `count`  as a  `long`  field, and  `tags`  as a  `keyword`  field.
+
+## 59. Combining Explicit and Dynamic Mapping
+
+-   While dynamic mapping can be useful, it may not always produce the desired results.
+-   In some cases, we may want to combine  explicit mapping  for certain fields with dynamic mapping for others.
+-   To do this, we can define an explicit mapping for certain fields and allow dynamic mapping for others.
+-   Here is an example of how to combine explicit and dynamic mapping:
+
+```
+PUT my_index
+{
+  "mappings": {
+    "properties": {
+      "message": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+```
+
+-   In this example, we define an explicit mapping for the  `message`  field as a  `text`  field.
+-   Now, when we index a document with a new field, Elasticsearch will use dynamic mapping to determine the data type and other properties of the new field.
+
+## 60. Configuring Dynamic Mapping
+
+-   Dynamic mapping can be configured to control how fields are mapped.
+    
+-   We can configure dynamic mapping using the  `dynamic`  parameter when defining an index mapping.
+    
+-   Here are some possible values for the  `dynamic`  parameter:
+    
+    -   `true`  (default): Allow dynamic mapping for new fields.
+    -   `false`: Disable dynamic mapping for new fields.
+    -   `strict`: Throw an exception if a new field is encountered that does not match an existing  field mapping.
+-   Here is an example of how to configure dynamic mapping:
+    
+
+```
+PUT my_index
+{
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "message": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+```
+
+-   In this example, we configure dynamic mapping to be strict, which means that Elasticsearch will throw an exception if a new field is encountered that does not match an existing field mapping.
+
+## 61. Dynamic Templates
+
+-   Dynamic templates  allow us to define patterns that match field names and specify how those fields should be mapped.
+-   This can be useful when dealing with data that has a large number of fields that follow a consistent  naming convention.
+-   To define a  dynamic template, we can use the  `dynamic_templates`  parameter when defining an index mapping.
+-   Here is an example of how to use dynamic templates:
+
+```
+PUT my_index
+{
+  "mappings": {
+    "dynamic_templates": [
+      {
+        "strings": {
+          "match_mapping_type": "string",
+          "mapping": {
+            "type": "text"
+          }
+        }
+      },
+      {
+        "longs": {
+          "match_mapping_type": "long",
+          "mapping": {
+            "type": "scaled_float",
+            "scaling_factor": 1000
+          }
+        }
+      }
+    ]
+  }
+}
+
+```
+
+-   In this example, we define two dynamic templates.
+-   The first template,  `strings`, matches any field with a  mapping type  of  `string`  and maps it as a  `text`  field.
+-   The second template,  `longs`, matches any field with a mapping type of  `long`  and maps it as a  `scaled_float`  field with a  scaling factor  of 1000.
