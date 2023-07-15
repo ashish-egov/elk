@@ -880,3 +880,225 @@ PUT my_index
 -   In this example, we define two dynamic templates.
 -   The first template,  `strings`, matches any field with a  mapping type  of  `string`  and maps it as a  `text`  field.
 -   The second template,  `longs`, matches any field with a mapping type of  `long`  and maps it as a  `scaled_float`  field with a  scaling factor  of 1000.
+
+## 62. Mapping Recommendations
+
+When mapping data in  Elasticsearch, it's important to choose the appropriate data types for each field to ensure accurate search results and efficient indexing. Here are some mapping recommendations:
+
+-   Use the  `text`  data type for full-text fields that require analysis, such as descriptions or titles.
+-   Use the  `keyword`  data type for fields that don't require analysis, such as  IDs  or categories.
+-   Use the  `date`  data type for  date fields.
+-   Use the  `integer`,  `long`, or  `double`  data types for numeric fields.
+-   Use the  `boolean`  data type for  boolean fields.
+
+Here's an example of how to create a mapping for an index:
+
+```
+PUT my-index
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "category": {
+        "type": "keyword"
+      },
+      "date": {
+        "type": "date"
+      },
+      "views": {
+        "type": "integer"
+      },
+      "published": {
+        "type": "boolean"
+      }
+    }
+  }
+}
+
+```
+
+## 63. Stemming & Stop Words
+
+Stemming is the process of reducing a word to its base or root form. This can be helpful for  search queries  because it allows for variations of a word to match the same results. For example, if a user searches for "running", they may also want results that include "run" or "runner".
+
+Stop words are common words such as "the" or "and" that are often excluded from search queries because they don't add much meaning to the query. Including  stop words  in search queries can lead to  irrelevant results  and slow down  query performance.
+
+Elasticsearch provides built-in analyzers for stemming and removing stop words, which can be applied to  text fields  in a mapping.
+
+Here's an example of a mapping with a custom analyzer that includes stemming and removes stop words:
+
+```
+PUT my-index
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "english": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "english_stop",
+            "english_stemmer"
+          ]
+        }
+      },
+      "filter": {
+        "english_stop": {
+          "type": "stop",
+          "stopwords": "_english_" 
+        },
+        "english_stemmer": {
+          "type": "stemmer",
+          "language": "english"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "english"
+      }
+    }
+  }
+}
+
+```
+
+## 64. Analyzers and Search Queries
+
+Analyzers are used to break down text into individual tokens that can be searched and analyzed. Elasticsearch provides several built-in analyzers, such as the  `standard`  analyzer, which tokenizes text based on whitespace and punctuation.
+
+When querying text fields, it's important to use the same analyzer that was used during indexing to ensure accurate results. If a different analyzer is used during querying, the  search terms  may not match the  indexed tokens.
+
+Here's an example of a  search query  that uses the same analyzer that was used during indexing:
+
+```
+GET my-index/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "running shoes",
+        "analyzer": "english"
+      }
+    }
+  }
+}
+
+```
+
+## 65. Built-in Analyzers
+
+Elasticsearch provides several built-in analyzers that can be used for text fields in a mapping. Here are some of the most commonly used built-in analyzers:
+
+-   `standard`: Tokenizes text based on whitespace and punctuation.
+-   `simple`: Tokenizes text based on whitespace and lowercase all tokens.
+-   `english`: Includes stemming and removes stop words for  English  text.
+-   `whitespace`: Tokenizes text based on whitespace only.
+-   `keyword`: Does not tokenize text and indexes the entire field as a single  token.
+
+Here's an example of how to use the  `english`  analyzer for a text field in a mapping:
+
+```
+PUT my-index
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "english"
+      }
+    }
+  }
+}
+
+```
+
+## 66. Creating Custom Analyzers
+
+In addition to the built-in analyzers, Elasticsearch allows for the creation of  custom analyzers  with specific tokenizers and filters.
+
+Here's an example of how to create a  custom analyzer  with a  `ngram`  tokenizer and a  `lowercase`  filter:
+
+```
+PUT _settings
+{
+  "analysis": {
+    "analyzer": {
+      "my_analyzer": {
+        "type": "custom",
+        "tokenizer": "my_tokenizer",
+        "filter": [
+          "lowercase"
+        ]
+      }
+    },
+    "tokenizer": {
+      "my_tokenizer": {
+        "type": "ngram",
+        "min_gram": 2,
+        "max_gram": 4
+      }
+    }
+  }
+}
+
+```
+
+This custom analyzer includes a  `ngram`  tokenizer, which breaks down text into all possible combinations of letters within a specified range (in this case, between 2 and 4 characters). The  `lowercase`  filter is then applied to lowercase all tokens.
+
+## 67. Adding Analyzers to Existing Indices
+
+Analyzers can be added to existing indices by updating the index settings with the new analyzer. However, existing documents will not be re-analyzed with the new analyzer. To re-index existing documents with the new analyzer, the index may need to be re-created.
+
+Here's an example of how to update a mapping with a new analyzer:
+
+```
+PUT my-index/_settings
+{
+  "analysis": {
+    "analyzer": {
+      "my_analyzer": {
+        "type": "custom",
+        "tokenizer": "my_tokenizer",
+        "filter": [
+          "lowercase"
+        ]
+      }
+    },
+    "tokenizer": {
+      "my_tokenizer": {
+        "type": "ngram",
+        "min_gram": 2,
+        "max_gram": 4
+      }
+    }
+  }
+}
+
+```
+
+## 68. Updating Analyzers
+
+Analyzers can be updated by modifying the  analyzer settings  in the  index settings  and re-indexing the documents. However, changing the analyzer for a field can have significant impacts on search results and relevancy, so it's important to carefully consider the effects of any changes.
+
+Here's an example of how to update the analyzer for a field:
+
+```
+PUT my-index/_mapping
+{
+  "properties": {
+    "title": {
+      "type": "text",
+      "analyzer": "new_analyzer"
+    }
+  }
+}
+
+```
+
+This updates the  `title`  field to use the  `new_analyzer`  analyzer. After updating the mapping, the documents in the index will need to be re-indexed to apply the new analyzer.
