@@ -1329,3 +1329,234 @@ Here is an example of a match_phrase query:
 In this example, we are searching for the phrase "quick brown fox" in the "description" field. Elasticsearch will search for the exact sequence of words in the field, in the order specified in the query.
 
 Overall, full text queries are a powerful tool for searching for text in Elasticsearch, and the match query, multi-match query, and match_phrase query are some of the most commonly used full text queries.
+
+# Leaf and Compound Queries
+
+In  Elasticsearch, queries can be classified as either leaf queries or compound queries.  Leaf queries  are the simplest type of query and are used to search for a specific term or terms in a field.  Compound queries, on the other hand, are used to combine  multiple leaf queries  or other compound queries to create more complex  search queries.
+
+## Querying with Boolean Logic
+
+Boolean logic  allows you to combine multiple search conditions using  logical operators  such as AND, OR, and NOT. In Elasticsearch, you can use boolean logic to create  complex search queries  by combining multiple leaf queries or compound queries.
+
+Here is an example of a boolean query:
+
+```
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title": "apple"
+          }
+        },
+        {
+          "range": {
+            "price": {
+              "gte": 1000,
+              "lte": 2000
+            }
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "match": {
+            "description": "refurbished"
+          }
+        }
+      ],
+      "should": [
+        {
+          "match": {
+            "brand": "Apple"
+          }
+        },
+        {
+          "match": {
+            "brand": "Samsung"
+          }
+        }
+      ]
+    }
+  }
+}
+
+```
+
+In this example, we are searching for products with the word "apple" in the "title" field, a price between 1000 and 2000, and a brand of either "Apple" or "Samsung". We are also excluding products that have the word "refurbished" in the "description" field.
+
+## Query Execution  Contexts
+
+In Elasticsearch, queries can be executed in two different contexts: the query context and the filter context. The  query context  is used to score documents based on the relevance of the query, while the  filter context  is used to filter documents based on the query.
+
+Here is an example of a filtered query:
+
+```
+{
+  "query": {
+    "filtered": {
+      "query": {
+        "match": {
+          "title": "apple"
+        }
+      },
+      "filter": {
+        "range": {
+          "price": {
+            "gte": 1000
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+In this example, we are searching for products with the word "apple" in the "title" field and a price greater than or equal to 1000. The  `match`  query is executed in the query context to score documents based on the relevance of the query, while the  `range`  filter is executed in the filter context to filter documents based on the query.
+
+## Boosting Query
+
+In Elasticsearch, you can use  query boosting  to give more weight to certain  search criteria. Query boosting allows you to prioritize certain search criteria over others, making it more likely that the most relevant results will appear at the top of the search results.
+
+Here is an example of a boosted query:
+
+```
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "title": {
+              "query": "apple",
+              "boost": 2
+            }
+          }
+        },
+        {
+          "match": {
+            "description": "apple"
+          }
+        }
+      ]
+    }
+  }
+}
+
+```
+
+In this example, we are searching for products with the word "apple" in either the "title" or "description" field. However, we have given more weight to the "title" field by setting the  `boost`  parameter to 2.
+
+## Disjunction Max (Dis_Max)
+
+Disjunction Max (Dis_Max) is a query that allows you to search for results that match any of the search criteria. It is useful when you want to search for documents that match multiple  search terms, but want to give more weight to certain search criteria.
+
+Here is an example of a Dis_Max query:
+
+```
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "match": {
+            "title": "apple"
+          }
+        },
+        {
+          "match": {
+            "description": "apple"
+          }
+        }
+      ],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+```
+
+In this example, we are searching for products with the word "apple" in either the "title" or "description" field. We have set the  `tie_breaker`  parameter to 0.3, which means that matches in the "description" field will be given less weight than matches in the "title" field.
+
+## Querying Nested Objects
+
+In Elasticsearch, you can search for  nested objects  within a document using nested queries. Nested queries allow you to search for documents that contain a specific nested object that matches certain criteria.
+
+Here is an example of a nested query:
+
+```
+{
+  "query": {
+    "nested":{
+      "path": "variants",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "match": {
+                "variants.color": "red"
+              }
+            },
+            {
+              "range": {
+                "variants.price": {
+                  "gte": 1000
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+```
+
+In this example, we are searching for products that have a  nested object  in the "variants" field that has a "color" of "red" and a "price" greater than or equal to 1000.
+
+## Nested Inner Hits
+
+In Elasticsearch, you can use  inner hits  to return nested objects that match a search query. Inner hits allow you to retrieve the nested objects that match a  search query, along with their parent documents.
+
+Here is an example of a  nested query  with inner hits:
+
+```
+{
+  "query": {
+    "nested": {
+      "path": "variants",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "match": {
+                "variants.color": "red"
+              }
+            },
+            {
+              "range": {
+                "variants.price": {
+                  "gte": 1000
+                }
+              }
+            }
+          ]
+        }
+      },
+      "inner_hits": {}
+    }
+  }
+}
+
+```
+
+In this example, we are searching for products that have a nested object in the "variants" field that has a "color" of "red" and a "price" greater than or equal to 1000. We have included the  `inner_hits`  parameter to retrieve the nested objects that match the search query.
+
+## Nested Fields Limitations
+
+When using nested objects in Elasticsearch, there are some limitations to be aware of. One limitation is that it can be more difficult to update nested objects than non-nested objects. Another limitation is that nested objects can affect the performance of search queries, especially when the nested objects are deeply nested or there are many of them.
+
+It is important to consider the limitations of nested objects when designing your  Elasticsearch index  and querying strategy. If possible, it may be more efficient to denormalize your data and use non-nested objects instead. However, if nested objects are necessary for your use case, Elasticsearch provides powerful tools for querying and managing nested objects.
