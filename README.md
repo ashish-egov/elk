@@ -1560,3 +1560,95 @@ In this example, we are searching for products that have a nested object in the 
 When using nested objects in Elasticsearch, there are some limitations to be aware of. One limitation is that it can be more difficult to update nested objects than non-nested objects. Another limitation is that nested objects can affect the performance of search queries, especially when the nested objects are deeply nested or there are many of them.
 
 It is important to consider the limitations of nested objects when designing your  Elasticsearch index  and querying strategy. If possible, it may be more efficient to denormalize your data and use non-nested objects instead. However, if nested objects are necessary for your use case, Elasticsearch provides powerful tools for querying and managing nested objects.
+
+# Tie Breaker in  Elasticsearch
+
+Tie breaker is an important feature in Elasticsearch that helps to determine the relevance of search results. It is a parameter that can be set in the  search query  to specify how documents with the same score should be ranked. In this article, we will discuss  tie breaker  in detail, including its definition, how it works, and examples of how it can be used.
+
+## What is Tie Breaker?
+
+When Elasticsearch executes a search query, it returns a list of documents that match the query. Each document is assigned a score based on how well it matches the query. The score is calculated by combining various factors such as  term frequency, field length, and document frequency. In some cases, multiple documents may have the same score. In such situations, Elasticsearch uses a tie breaker to determine the order in which the documents are ranked.
+
+Tie breaker is a parameter that can be set in the search query to specify how Elasticsearch should rank documents with the same score. The  tie breaker value  is a number between 0 and 1. A tie breaker value of 0 means that Elasticsearch should ignore the scores and sort the documents based on their internal document ID. A tie breaker value of 1 means that Elasticsearch should use the scores to determine the order in which the documents are ranked.
+
+## How does Tie Breaker work?
+
+To understand how tie breaker works, let's consider an example. Suppose we have a search query that matches three documents, and each document has a score of 0.8. If we set the tie breaker to 0, Elasticsearch will ignore the scores and sort the documents based on their  internal document ID, which is assigned by Elasticsearch when the document is indexed. In this case, the order of the documents will be arbitrary.
+
+On the other hand, if we set the tie breaker to 1, Elasticsearch will use the scores to determine the order in which the documents are ranked. Since all the documents have the same score, Elasticsearch will use the tie breaker value to break the tie. For example, if we set the tie breaker to 0.1, Elasticsearch will add 0.1 to the score of the first document, 0.2 to the score of the second document, and 0.3 to the score of the third document. The new scores will be 0.9, 1.0, and 1.1, respectively. Elasticsearch will then sort the documents based on their new scores, with the third document being ranked first, followed by the second document, and then the first document.
+
+## Examples of Tie Breaker in Elasticsearch
+
+Let's consider some examples of how tie breaker can be used in Elasticsearch.
+
+### Example 1: Sorting by Multiple Fields
+
+Suppose we have an index of products, and we want to sort the products by their price and their popularity. We can use the following query to achieve this:
+
+```
+{
+    "query": {
+        "match_all": {}
+    },
+    "sort": [
+        { "price": { "order": "asc", "mode": "min", "tie_breaker": 0.7 }},
+        { "popularity": { "order": "desc", "mode": "max", "tie_breaker": 0.3 }}
+    ]
+}
+
+```
+
+In this query, we are  sorting  by the  `price`  field in ascending order and using the  `min`  mode to break ties. We are also setting the tie breaker to 0.7, which means that the price will be the primary sorting criterion. If two products have the same price, Elasticsearch will use the popularity field to break the tie. We are using the  `max`  mode for the  popularity field  and setting the tie breaker to 0.3, which means that popularity will be the secondary  sorting criterion.
+
+### Example 2: Boosting Exact Matches
+
+Suppose we have a search query that matches multiple fields, and we want to boost documents that have an exact match in one of the fields. We can use the following query to achieve this:
+
+```
+{
+    "query": {
+        "multi_match": {
+            "query": "apple",
+            "fields": ["name^3", "description"],
+            "type": "best_fields",
+            "tie_breaker": 0.5
+        }
+    }
+}
+
+```
+
+In this query, we are using the  `multi_match`  query to search for the term  `apple`  in the  `name`  and  `description`  fields. We are boosting the  `name`  field by a factor of 3 using the  `^3`  syntax. We are also setting the tie breaker to 0.5, which means that documents with an exact match in the  `name`  field will be ranked higher than documents with a partial match in both fields.
+
+### Example 3: Sorting by Distance
+
+Suppose we have an index of restaurants, and we want to sort the restaurants by their distance from a specific location. We can use the following query to achieve this:
+
+```
+{
+    "query": {
+        "match_all": {}
+    },
+    "sort": [
+        {
+            "_geo_distance": {
+                "location": {
+                    "lat": 40.71427,
+                    "lon": -74.00597
+                },
+                "order": "asc",
+                "unit": "km",
+                "mode": "min",
+                "tie_breaker": 0.5
+            }
+        }
+    ]
+}
+
+```
+
+In this query, we are sorting by the  `_geo_distance`  field, which is a special field that calculates the distance between two points using the  Haversine formula. We are specifying the location of the point we want to measure the distance from using the  `location`  parameter. We are setting the order to  `asc`, which means that Elasticsearch will sort the documents by their distance in ascending order. We are using the  `min`  mode to break ties and setting the tie breaker to 0.5, which means that documents with a similar distance will be ranked equally.
+
+## Conclusion
+
+Tie breaker is an important feature in Elasticsearch that helps to determine the relevance of search results. It allows us to specify how documents with the same score should be ranked, based on one or more criteria. By using tie breaker, we can create more precise and accurate  search queries  that return the most relevant results to the user.
