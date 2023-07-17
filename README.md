@@ -1652,3 +1652,148 @@ In this query, we are sorting by the  `_geo_distance`  field, which is a special
 ## Conclusion
 
 Tie breaker is an important feature in Elasticsearch that helps to determine the relevance of search results. It allows us to specify how documents with the same score should be ranked, based on one or more criteria. By using tie breaker, we can create more precise and accurate  search queries  that return the most relevant results to the user.
+
+
+## Mapping Document Relationships
+
+In Elasticsearch, mapping is the process of defining how documents and their fields are stored and indexed. Mapping is important because it affects the way that Elasticsearch handles queries and how search results are returned. One important aspect of mapping is defining document relationships.
+
+### One-to-one Relationships
+
+In Elasticsearch, a one-to-one relationship can be defined by simply adding a field to the document that contains the related data. For example, if we have a  `user`  and  `address`  document, we can define a one-to-one relationship between them by adding an  `address`  field to the  `user`  document:
+
+```
+PUT /users/_doc/1
+{
+  "name": "John Doe",
+  "address": {
+    "street": "123 Main St",
+    "city": "Anytown",
+    "state": "CA",
+    "zip": "12345"
+  }
+}
+
+```
+
+### One-to-many Relationships
+
+In Elasticsearch, a one-to-many relationship can be defined using  nested documents  or parent-child relationships.
+
+#### Nested Documents
+
+Nested documents allow us to define a one-to-many relationship between documents by nesting the related data inside an array. For example, if we have a  `user`  and  `comment`  document, we can define a one-to-many relationship between them using nested documents:
+
+```
+PUT /users/_doc/1
+{
+  "name": "John Doe",
+  "comments": [
+    {
+      "text": "Great article!",
+      "date": "2021-09-01"
+    },
+    {
+      "text": "Thanks for sharing!",
+      "date": "2021-09-02"
+    }
+  ]
+}
+
+```
+
+#### Parent-Child Relationships
+
+Parent-child relationships allow us to define a one-to-many relationship between documents by creating a parent document and one or more child documents that are related to it. For example, if we have a  `blog`  and  `comment`  document, we can define a parent-child relationship between them:
+
+```
+PUT /blogs/_doc/1
+{
+  "title": "My Blog Post",
+  "content": "This is my blog post.",
+  "author": "John Doe"
+}
+
+PUT /comments/_doc/1?routing=1
+{
+  "blog_id": "1",
+  "text": "Great post!",
+  "date": "2021-09-01"
+}
+
+PUT /comments/_doc/2?routing=1
+{
+  "blog_id": "1",
+  "text": "Thanks for sharing!",
+  "date": "2021-09-02"
+}
+
+```
+
+In this example, we have created a  `blog`  document with an ID of 1 and two related  `comment`  documents with IDs 1 and 2. We have specified the  routing parameter  to ensure that the  child documents  are stored on the same shard as the  parent document.
+
+## Adding Documents
+
+Adding documents to Elasticsearch is a simple process that involves sending an HTTP request to the Elasticsearch server. The request must include the document data in  JSON format  and specify the index and type of the document.
+
+### Indexing a Document
+
+To add a document to Elasticsearch, we can use the  `PUT`  method to send an HTTP request to the server with the document data in JSON format. For example, to add a  `product`  document to the  `products`  index, we can use the following request:
+
+```
+PUT /products/_doc/1
+{
+  "name": "Product 1",
+  "description": "This is product 1.",
+  "price": 9.99,
+  "in_stock": true
+}
+
+```
+
+In this example, we are adding a  `product`  document with an ID of 1 to the  `products`  index. The document data is specified in  JSON  format inside the request body.
+
+### Updating a Document
+
+To update a document in Elasticsearch, we can use the  `POST`  method to send an HTTP request to the server with the updated  document data  in JSON format. For example, to update the  `name`  field of the  `product`  document with an ID of 1, we can use the following request:
+
+
+```
+POST /products/_doc/1/_update
+{
+  "doc": {
+    "name": "Product 2"
+  }
+}
+
+```
+
+In this example, we are updating the  `name`  field of the  `product`  document with an ID of 1 to "Product 2". The  `doc`  parameter is used to specify the updated document data in JSON format.
+
+### Deleting a Document
+
+To delete a document in Elasticsearch, we can use the  `DELETE`  method to send an HTTP request to the server with the ID of the document we want to delete. For example, to delete the  `product`  document with an ID of 1, we can use the following request:
+
+```
+DELETE /products/_doc/1
+
+```
+
+In this example, we aredeleting the  `product`  document with an ID of 1 from the  `products`  index.
+
+### Bulk Indexing
+
+Bulk indexing is the process of adding multiple documents to Elasticsearch in a single request. This can be more efficient than indexing individual documents, especially when dealing with large datasets.
+
+To  bulk index  documents in Elasticsearch, we can use the  `POST`  method to send an HTTP request to the server with the document data in a specific format. The data must be specified in JSON format, with each document separated by a newline character. For example, to add two  `product`  documents to the  `products`  index, we can use the following request:
+
+```
+POST /products/_bulk
+{ "index": { "_id": "1" }}
+{ "name": "Product 1", "description": "This is product 1.", "price": 9.99, "in_stock": true }
+{ "index": { "_id": "2" }}
+{ "name": "Product 2", "description": "This is product 2.", "price": 19.99, "in_stock": false }
+
+```
+
+In this example, we are using the  `index`  action to add two  `product`  documents to the  `products`  index. The  `_id`  parameter is used to specify the  ID  of each document. The document data is specified in JSON format, with each document separated by a newline character.
