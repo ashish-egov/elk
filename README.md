@@ -1797,3 +1797,243 @@ POST /products/_bulk
 ```
 
 In this example, we are using the  `index`  action to add two  `product`  documents to the  `products`  index. The  `_id`  parameter is used to specify the  ID  of each document. The document data is specified in JSON format, with each document separated by a newline character.
+
+Introduction to this section
+In this section, we will be discussing how to manage relationships between documents in Elasticsearch using join queries. Elasticsearch is a powerful search engine that allows us to store, search, and analyze data at scale. However, when dealing with complex data structures, it can be challenging to model relationships between documents. In this section, we will explore various techniques for managing relationships between documents, including parent-child relationships, multi-level relationships, and terms lookup mechanisms.
+
+Adding departments test data
+Before we dive into managing relationships between documents in Elasticsearch, we need to create some test data. Let's start by adding some departments to our Elasticsearch index. We will create a new index called "departments" and add some sample data using the following code:
+
+json
+Copy
+PUT /departments
+{
+  "mappings": {
+    "properties": {
+      "name": { "type": "text" },
+      "description": { "type": "text" }
+    }
+  }
+}
+
+POST /departments/_doc
+{
+  "name": "Sales",
+  "description": "Responsible for selling products and services"
+}
+
+POST /departments/_doc
+{
+  "name": "Marketing",
+  "description": "Responsible for promoting products and services"
+}
+
+POST /departments/_doc
+{
+  "name": "Engineering",
+  "description": "Responsible for building products and services"
+}
+Mapping document relationships
+To manage relationships between documents in Elasticsearch, we need to use the "join" datatype. The join datatype allows us to create parent-child relationships between documents. Let's create a new index called "employees" and add a mapping with a join field to manage the relationship between employees and departments.
+
+json
+Copy
+PUT /employees
+{
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "department": {
+        "type": "join",
+        "relations": {
+          "employee": "department"
+        }
+      }
+    }
+  }
+}
+In the mapping above, we define a "join" field called "department" that has a relation to the "employee" and "department" types. This mapping allows us to create a parent-child relationship between employees and departments.
+
+Adding documents
+Now that we have defined our mapping, let's add some sample data to our "employees" index.
+
+json
+Copy
+POST /employees/_doc
+{
+  "name": "John Doe",
+  "department": {
+    "name": "Sales",
+    "parent": "department"
+  }
+}
+
+POST /employees/_doc
+{
+  "name": "Jane Smith",
+  "department": {
+    "name": "Marketing",
+    "parent": "department"
+  }
+}
+
+POST /employees/_doc
+{
+  "name": "Mark Johnson",
+  "department": {
+    "name": "Engineering",
+    "parent": "department"
+  }
+}
+In the documents above, we create three employees and associate them with their respective departments using the join field "department".
+
+Querying by parent ID
+One of the most common operations when dealing with parent-child relationships is querying for child documents by parent ID. Let's say we want to find all employees in the "Sales" department. We can use the following query to achieve this:
+
+json
+Copy
+GET /employees/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "department",
+      "query": {
+        "match": {
+          "name": "Sales"
+        }
+      }
+    }
+  }
+}
+In this query, we use the "has_parent" query to find all employees that have a parent department with the name "Sales". The "parent_type" parameter specifies the parent document type, and the "query" parameter specifies the query to find the parent document.
+
+Querying child documents by parent
+Sometimes we may need to query child documents and return their parent documents as well. Let's say we want to find all employees and their respective departments. We can use the "has_child" query to achieve this:
+
+json
+Copy
+GET /departments/_search
+{
+  "query": {
+    "has_child": {
+      "type": "employee",
+      "query": {
+        "match_all": {}
+      },
+      "inner_hits": {}
+    }
+  }
+}
+In this query, we use the "has_child" query to find all employees and their respective departments. The "type" parameter specifies the child document type, and the "query" parameter specifies the query to find the child documents. We also use the "inner_hits" parameter to return the parent document for each matching child document.
+
+Querying parent by child documents
+Sometimes we may need to query parent documents and return their child documents as well. Let's say we want to find all departments and their respective employees. We can use the "has_child" query to achieve this:
+
+json
+Copy
+GET /departments/_search
+{
+  "query": {
+    "has_child": {
+      "type": "employee",
+      "query": {
+        "match_all": {}
+      },
+      "inner_hits": {}
+    }
+  }
+}
+In this query, we use the "has_child" query to find all departments and their respective employees. The "type" parameter specifies the child document type, and the "query" parameter specifies the query to find the child documents. We also use the "inner_hits" parameter to return the child documents for each matching parent document.
+
+Multi-level relations
+Sometimes we may need to model more complex relationships between documents, such as multi-level relationships. Let's say we want to model a company structure where each department has a manager. We can use the following mapping to achieve this:
+
+json
+Copy
+PUT /departments
+{
+  "mappings": {
+    "properties": {
+      "name": { "type": "text" },
+      "description": { "type": "text" },
+      "manager": {
+        "type": "join",
+        "relations": {
+          "department": "employee"
+        }
+      }
+    }
+  }
+}
+In this mapping, we define a new join field called "manager" that has a relation to the "department" and "employee" types. This mapping allows us to create a multi-level relationship between departments, employees, and managers.
+
+Parent/child inner hits
+When querying parent-child relationships, we may need to return both the parent and child documents in the same query. We can use the "inner_hits" parameter to achieve this. Let's say we want to find all departments and their respective employees with the name "John Doe". We can use the following query to achieve this:
+
+json
+Copy
+GET /departments/_search
+{
+  "query": {
+    "has_child": {
+      "type": "employee",
+      "query": {
+        "match": {
+          "name": "John Doe"
+        }
+      },
+      "inner_hits": {}
+    }
+  }
+}
+In this query, we use the "has_child" query to find all employees with the name "John Doe" and their respective departments. We also use the "inner_hits" parameter to return the parent document for each matching child document.
+
+Terms lookup mechanism
+Sometimes we may need to model relationships between documents using external data sources. We can use the "terms" lookup mechanism to achieve this. Let's say we want to associate each employee with a department based on an external CSV file. We can use the following mapping to achieve this:
+
+json
+Copy
+PUT /employees
+{
+  "mappings": {
+    "properties": {
+      "name": { "type": "text" },
+      "department_id": { "type": "keyword" },
+      "department": {
+        "type": "join",
+        "relations": {
+          "employee": "department"
+        }
+      }
+    }
+  }
+}
+In this mapping, we define a new field called "department_id" that stores the department ID for each employee. We also define a join field called "department" that has a relation to the "employee" and "department" types. We can then use the following query to associate each employee with their respective department based on the "department_id" field:
+
+json
+Copy
+POST /employees/_update_by_query
+{
+  "script": {
+    "source": "ctx._source.department = ['department', params.dept]",
+    "lang": "painless",
+    "params": {
+      "dept": {
+        "_id": "sales",
+        "_index": "departments"
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+In this query, we use the "update_by_query" API to update all employee documents. We use a script to set the "department" field to the "sales" department using the "terms" lookup mechanism.
+
+Join limitations
+While join queries can be a powerful tool for managing relationships between documents, they also have some limitations. Join queries can be slow and resource-intensive, especially when dealing with large datasets. Join queries can also complicate indexing and query performance, as they require additional processing and memory overhead. Finally, join queries can be difficult to scale horizontally, as they require coordination between shards.
+
+Join field performance considerations
+When using join fields in Elasticsearch, there are several performance considerations to keep in mind. Join fields can increase the size of the index and require additional memory overhead. Join fields can also impact indexing and query performance, as they require additional processing and memory overhead. Finally, join fields can impact shard size and distribution, as they require coordination between shards. To mitigate these performance considerations, it is important to carefully design your index mapping and optimize your indexing and query strategies.
