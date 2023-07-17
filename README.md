@@ -1262,3 +1262,70 @@ GET my-index/_search
 ```
 
 This query uses a  `bool`  query to negate the  `exists`  query and retrieve documents where the  `description`  field does not exist.
+
+
+## Match Query
+
+The  match query  is one of the most commonly used full text queries in Elasticsearch. It is used to search for a specific word or phrase in a text field. The match query analyzes the text in the field and then searches for the specified word or phrase in the analyzed text.
+
+Here is an example of a match query:
+
+```
+{
+  "query": {
+    "match": {
+      "description": "quick brown fox"
+    }
+  }
+}
+
+```
+
+In this example, we are searching for the phrase "quick brown fox" in the "description" field. Elasticsearch will analyze the text in the field and then search for the phrase in the analyzed text.
+
+## Introduction to Relevance Scoring
+
+When performing a  full text search  in Elasticsearch, the documents that match the  search query  are returned in order of relevance. Relevance is calculated based on a  scoring algorithm  that takes into account factors such as the frequency of the  search terms  in the document, the length of the document, and other factors.
+
+The  relevance score  for a document is a number between 0 and 1, with 1 being the most relevant document. By default, Elasticsearch returns documents in order of relevance, with the most relevant documents first.
+
+## Searching Multiple Fields
+
+In Elasticsearch, you can search for text in multiple fields at once using the multi-match query. The multi-match query allows you to specify a list of fields to search in and a  search term. Elasticsearch will then search for the search term in all of the specified fields.
+
+Here is an example of a multi-match query:
+
+```
+{
+  "query": {
+    "multi_match": {
+      "query": "quick brown fox",
+      "fields": ["title", "description"]
+    }
+  }
+}
+
+```
+
+In this example, we are searching for the phrase "quick brown fox" in both the "title" and "description" fields. Elasticsearch will analyze the text in both fields and then search for the phrase in the analyzed text.
+
+## Phrase Searches
+
+In Elasticsearch, you can search for a specific phrase using the match_phrase query. The match_phrase query searches for a specific sequence of words in a text field. The sequence of words must appear in the text field in the exact order specified in the query.
+
+Here is an example of a match_phrase query:
+
+```
+{
+  "query": {
+    "match_phrase": {
+      "description": "quick brown fox"
+    }
+  }
+}
+
+```
+
+In this example, we are searching for the phrase "quick brown fox" in the "description" field. Elasticsearch will search for the exact sequence of words in the field, in the order specified in the query.
+
+Overall, full text queries are a powerful tool for searching for text in Elasticsearch, and the match query, multi-match query, and match_phrase query are some of the most commonly used full text queries.
