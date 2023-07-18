@@ -2247,3 +2247,319 @@ GET /my-index/_search
   }
 }
 ```
+
+## Introduction to Aggregations
+
+Aggregations inElasticsearch allow you to perform  data analysis  on your search results. Aggregations can be used to calculate metrics such as average, sum, min, max, and more, as well as to group data into buckets based on specific criteria.
+
+## Metric Aggregations
+
+Metric aggregations allow you to perform calculations on the values in a field. There are several types of  metric aggregations, including:
+
+-   `avg`: calculates the average of the values in a field
+-   `sum`: calculates the sum of the values in a field
+-   `min`: finds the minimum value in a field
+-   `max`: finds the  maximum value  in a field
+-   `stats`: calculates multiple metrics, including min, max, avg, and more
+
+Here's an example of how to perform an  `avg`  aggregation on the  `price`  field:
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "avg_price": {
+      "avg": {
+        "field": "price"
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Introduction to Bucket Aggregations
+
+Bucket aggregations group documents into buckets based on specific criteria. There are several types of  bucket aggregations, including:
+
+-   `terms`:  groups documents  based on the values in a field
+-   `date_histogram`: groups documents based on  date intervals
+-   `range`: groups documents based on a range of values in a field
+-   `histogram`: groups documents based on  numeric intervals
+-   `geo_distance`: groups documents based on distance from a geographic point
+
+Here's an example of how to perform a  `terms`  aggregation on the  `category`  field:
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "category_count": {
+      "terms": {
+        "field": "category"
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Document Counts are Approximate
+
+When performing aggregations,  Elasticsearch  returns approximate  document counts  by default. This is because the exact document count can be expensive to calculate and may not be necessary for many use cases. However, you can get more accurate document counts by setting the  `size`  parameter to 0.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "category_count": {
+      "terms": {
+        "field": "category"
+      }
+    }
+  },
+  "size": 0,
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Nested Aggregations
+
+You can nest aggregations within other aggregations to perform more  complex data  analysis. For example, you could group documents by category and then calculate the  average price  for each category.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "category_count": {
+      "terms": {
+        "field": "category"
+      },
+      "aggs": {
+        "avg_price": {
+          "avg": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Filtering out Documents
+
+You can use the  `filter`  aggregation to exclude documents from an aggregation. For example, you could exclude documents with a price less than 10.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "category_count": {
+      "terms": {
+        "field": "category"
+      },
+      "aggs": {
+        "filtered_price": {
+          "filter": {
+            "range": {
+              "price": {
+                "gte": 10
+              }
+            }
+          },
+          "aggs": {
+            "avg_price": {
+              "avg": {
+                "field": "price"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Defining Bucket Rules with Filters
+
+You can use the  `filters`  aggregation to group documents into multiple buckets based on specific criteria. For example, you could group documents into two buckets based on whether the price is less than or equal to 10.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "price_buckets": {
+      "filters": {
+        "filters": {
+          "cheap": {
+            "range": {
+              "price": {
+                "lte": 10
+              }
+            }
+          },
+          "expensive": {
+            "range": {
+              "price": {
+                "gt": 10
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Range Aggregations
+
+The  `range`  aggregation allows you to group documents into buckets based on a range of values in a field. For example, you could group documents into three buckets based onthe  price range: less than 10, between 10 and 20, and greater than 20.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "price_ranges": {
+      "range": {
+        "field": "price",
+        "ranges": [
+          {
+            "to": 10
+          },
+          {
+            "from": 10,
+            "to": 20
+          },
+          {
+            "from": 20
+          }
+        ]
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Histograms
+
+The  `histogram`  aggregation allows you to group documents into buckets based on numeric intervals. For example, you could group documents into buckets based on the price range: less than 10, between 10 and 20, between 20 and 30, and greater than 30.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "price_histogram": {
+      "histogram": {
+        "field": "price",
+        "interval": 10
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Global Aggregation
+
+The  `global`  aggregation allows you to perform aggregations across all documents in an index or a subset of documents. For example, you could calculate the average price across all documents in an index.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "global_stats": {
+      "global": {},
+      "aggs": {
+        "avg_price": {
+          "avg": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Missing Field Values
+
+The  `missing`  aggregation allows you to group documents that have a missing value in a field.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "missing_values": {
+      "missing": {
+        "field": "category"
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Aggregating Nested Objects
+
+You can use the  `nested`  aggregation to perform aggregations on  nested objects  in a document. For example, you could calculate the average price of all items in a nested  `items`  object.
+
+```
+GET /my-index/_search
+{
+  "aggs": {
+    "nested_items": {
+      "nested": {
+        "path": "items"
+      },
+      "aggs": {
+        "avg_price": {
+          "avg": {
+            "field": "items.price"
+          }
+        }
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+```
