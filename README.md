@@ -2066,3 +2066,184 @@ While join queries can be a powerful tool for managing relationships between doc
 ## Join field performance considerations
 
 When using  join fields  in Elasticsearch, there are several performance considerations to keep in mind. Join fields can increase the size of the index and require additional memory overhead. Join fields can also impact indexing and query performance, as they require additional processing and memory overhead. Finally, join fields can impact  shard size  and distribution, as they require coordination between shards. To mitigate these performance considerations, it is important to carefully design your  index mapping  and optimize your indexing and  query strategies.
+
+
+## Document Types
+
+In  Elasticsearch, a document represents a single instance of an entity in a particular index. Each document has a unique ID and it is stored in JSON format. Elasticsearch allows you to define different  document types  within an index to organize your data.
+
+In previous versions of Elasticsearch, you could define multiple document types within a single index. However, starting from version 7.0, only one  document type  is allowed per index.
+
+## Specifying the Result Format
+
+When you query Elasticsearch, it returns the results in  JSON format  by default. However, you can specify a different format using the  `format`  parameter. The following formats are supported:
+
+-   json (default)
+-   yaml
+-   msgpack
+-   csv
+-   tsv
+
+Here's an example of how to specify the  result format  as  `csv`:
+
+```
+GET /my-index/_search?format=csv
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Source Filtering
+
+Source filtering  allows you to control which fields are returned in the search results. You can either include or exclude fields from the  `_source`  field of the search results.
+
+Here's an example of how to include only the  `title`  and  `author`  fields in the search results:
+
+```
+GET /my-index/_search
+{
+  "_source": ["title", "author"],
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+You can also exclude fields from the search results by using the  `exclude`  parameter:
+
+```
+GET /my-index/_search
+{
+  "_source": {
+    "excludes": ["description"]
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Specifying the Result Size
+
+By default, Elasticsearch returns only 10 search results. However, you can specify the number of search results to be returned using the  `size`  parameter.
+
+Here's an example of how to specify the number of search results as 20:
+
+```
+GET /my-index/_search
+{
+  "size": 20,
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Specifying an Offset
+
+The  `from`  parameter allows you to skip a certain number of search results. This is useful for implementing pagination.
+
+Here's an example of how to skip the first 20 search results and return the next 10:
+
+```
+GET /my-index/_search
+{
+  "from": 20,
+  "size": 10,
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Pagination
+
+To implement pagination, you can use the  `from`  and  `size`  parameters together. For example, to return the second page of search results with 10 items per page:
+
+```
+GET /my-index/_search
+{
+  "from": 10,
+  "size": 10,
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Sorting Results
+
+You can sort the search results based on one or more fields using the  `sort`  parameter. By default, the search results are sorted in ascending order.
+
+Here's an example of how to sort the search results based on the  `date`  field in descending order:
+
+```
+GET /my-index/_search
+{
+  "sort": [
+    {
+      "date": {
+        "order": "desc"
+      }
+    }
+  ],
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Sorting by Multi-Value Fields
+
+If a field contains multiple values, you can sort the search results based on a specific value using the  `sort`  parameter.
+
+Here's an example of how to sort the search results based on the second value in the  `tags`  field:
+
+```
+GET /my-index/_search
+{
+  "sort": [
+    {
+      "tags.1": {
+        "order": "asc"
+      }
+    }
+  ],
+  "query": {
+    "match_all": {}
+  }
+}
+
+```
+
+## Filters
+
+Filters allow you to narrow down the search results based on specific criteria. You can use different types of filters in Elasticsearch, such as term, range, bool, and more.
+
+Here's an example of how to filter the search results based on the  `status`  field:
+
+```
+GET /my-index/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "status": "published"
+          }
+        }
+      ]
+    }
+  }
+}
+```
